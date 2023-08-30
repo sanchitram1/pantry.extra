@@ -1,0 +1,38 @@
+ .Github/Workflows/Example.Yml
+
+Name: Merge Upstream Branches
+On:
+  Schedule:
+     # Actually, ~5 Minutes Is The Highest
+     # Effective Frequency You Will Get
+    - Cron:  '* * * * *'
+Jobs:
+  Merge:
+    Runs-On: Ubuntu-Latest
+    Steps:
+      - Uses: Actions/Checkout@V2
+      - Name: Merge Upstream
+        Run: |
+          git config --global user.name 'Sanchit Ram'
+          git config --global user.email 'sanchit@tea.xyz'
+          
+          # "Git Checkout Master" Is Unnecessary, Already Here By Default
+          git pull --unshallow  # This Option Is Very Important, You Would Get
+                                # Complains About Unrelated Histories Without It.
+                                # (But Actions/Checkout@V2 Can Also Be Instructed
+                                # To Fetch All Git Depth Right From The Start)
+
+          git remote add upstream https://github.com/teaxyz/pantry.git
+          git fetch upstream
+
+          # Neither Forget The -B Opt,
+          # The Feature/X Ref Is Ambiguous At This Stage
+          git checkout -b feature/x origin/feature/x
+          git merge --no-edit upstream/feature/x
+          git push origin feature/x
+
+          git checkout main
+          git merge --no-edit upstream/main
+          git push origin main
+          
+          # Etc
